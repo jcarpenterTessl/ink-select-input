@@ -4,6 +4,7 @@ import arrayToRotated from 'to-rotated';
 import {Box, useInput} from 'ink';
 import Indicator, {type Props as IndicatorProps} from './Indicator.js';
 import ItemComponent, {type Props as ItemProps} from './Item.js';
+import Divider from './Divider.js';
 
 type Props<V> = {
 	/**
@@ -27,6 +28,12 @@ type Props<V> = {
 	readonly initialIndex?: number;
 
 	/**
+	 * Flex direction to render items in. 'row' or 'column'
+	 * @default 'column'
+	 */
+	readonly direction?: 'row' | 'column';
+
+	/**
 	 * Number of items to display.
 	 */
 	readonly limit?: number;
@@ -40,6 +47,11 @@ type Props<V> = {
 	 * Custom component to override the default item component.
 	 */
 	readonly itemComponent?: FC<ItemProps>;
+
+	/**
+	 * Custom component to override the divider component in 'row' direction
+	 */
+	readonly dividerComponent?: FC<any>;
 
 	/**
 	 * Function to call when user selects an item. Item object is passed to that function as an argument.
@@ -64,6 +76,8 @@ function SelectInput<V>({
 	initialIndex = 0,
 	indicatorComponent = Indicator,
 	itemComponent = ItemComponent,
+	dividerComponent = Divider,
+	direction = 'column',
 	limit: customLimit,
 	onSelect,
 	onHighlight,
@@ -97,9 +111,21 @@ function SelectInput<V>({
 	useInput(
 		useCallback(
 			(input, key) => {
-				if (input === 'k' || key.upArrow) {
+				// Previous
+				if (
+					input === 'k' ||
+					(key.tab && key.shift) ||
+					(direction === 'column' && key.upArrow) ||
+					(direction === 'row' && key.leftArrow)
+				) {
 					const lastIndex = (hasLimit ? limit : items.length) - 1;
 					const atFirstIndex = selectedIndex === 0;
+
+					// Only loop from first to last item if shift+tab was pressed
+					if (atFirstIndex && !(key.tab && key.shift)) {
+						return;
+					}
+
 					const nextIndex = hasLimit ? selectedIndex : lastIndex;
 					const nextRotateIndex = atFirstIndex ? rotateIndex + 1 : rotateIndex;
 					const nextSelectedIndex = atFirstIndex
@@ -118,9 +144,21 @@ function SelectInput<V>({
 					}
 				}
 
-				if (input === 'j' || key.downArrow) {
+				// Next
+				if (
+					input === 'j' ||
+					key.tab ||
+					(direction === 'column' && key.downArrow) ||
+					(direction === 'row' && key.rightArrow)
+				) {
 					const atLastIndex =
 						selectedIndex === (hasLimit ? limit : items.length) - 1;
+
+					// Only loop from last to first item if tab was pressed
+					if (atLastIndex && !key.tab) {
+						return
+					}
+
 					const nextIndex = hasLimit ? selectedIndex : 0;
 					const nextRotateIndex = atLastIndex ? rotateIndex - 1 : rotateIndex;
 					const nextSelectedIndex = atLastIndex ? nextIndex : selectedIndex + 1;
@@ -181,15 +219,23 @@ function SelectInput<V>({
 		: items;
 
 	return (
-		<Box flexDirection="column">
+		<Box flexDirection={direction}>
 			{slicedItems.map((item, index) => {
 				const isSelected = index === selectedIndex;
 
-				return (
+				return direction === 'column' ? (
 					// @ts-expect-error - `key` can't be optional but `item.value` is generic T
 					<Box key={item.key ?? item.value}>
 						{React.createElement(indicatorComponent, {isSelected})}
 						{React.createElement(itemComponent, {...item, isSelected})}
+					</Box>
+				) : (
+					// @ts-expect-error - `key` can't be optional but `item.value` is generic T
+					<Box key={item.key ?? item.value}>
+						{React.createElement(itemComponent, {...item, isSelected})}
+						{dividerComponent &&
+							index < slicedItems.length - 1 &&
+							React.createElement(dividerComponent)}
 					</Box>
 				);
 			})}

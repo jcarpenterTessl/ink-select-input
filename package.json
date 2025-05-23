@@ -1,14 +1,24 @@
 {
-	"name": "ink-select-input",
-	"version": "6.2.0",
-	"description": "Select input component for Ink",
+	"name": "@jcarpenter-tessl/ink-select-input",
+	"version": "1.0.0",
+	"description": "Fork of ink-select-input component for Ink with additional layout options",
 	"license": "MIT",
-	"repository": "vadimdemedes/ink-select-input",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/jcarpenterTessl/ink-select-input.git"
+	},
 	"author": {
 		"name": "Vadim Demedes",
 		"email": "vdemedes@gmail.com",
 		"url": "https://github.com/vadimdemedes"
 	},
+	"contributors": [
+		{
+			"name": "Josh Carpenter",
+			"email": "josh@tessl.io",
+			"url": "https://github.com/jcarpenterTessl/ink-select-input"
+		}
+	],
 	"type": "module",
 	"exports": {
 		"types": "./build/index.d.ts",
@@ -49,14 +59,17 @@
 		"ink-testing-library": "^4.0.0",
 		"prettier": "^3.2.5",
 		"react": "^18.3.1",
+		"react-dom": "^18.0.0",
+		"react-reconciler": "^0.29.0",
 		"sinon": "^18.0.0",
 		"tsimp": "^2.0.11",
 		"typescript": "^5.4.5",
 		"xo": "^0.58.0"
 	},
 	"peerDependencies": {
-		"ink": ">=5.0.0",
-		"react": ">=18.0.0"
+		"react": "^18.0.0",
+		"react-dom": "^18.0.0",
+		"react-reconciler": "^0.29.0"
 	},
 	"ava": {
 		"extensions": {
